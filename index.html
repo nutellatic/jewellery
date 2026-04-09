@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Veloura Jewellery</title>
+
+<style>
+body {
+    margin:0;
+    font-family:'Segoe UI', sans-serif;
+    background:#fdfaf6;
+}
+
+/* HEADER */
+header {
+    background:#111;
+    color:white;
+    display:flex;
+    justify-content:space-between;
+    padding:20px 40px;
+    position:relative;
+}
+
+nav {
+    display:flex;
+}
+
+nav a {
+    color:white;
+    margin-left:20px;
+    text-decoration:none;
+}
+
+/* MOBILE MENU */
+.menu-icon {
+    display:none;
+    font-size:24px;
+    cursor:pointer;
+}
+
+@media(max-width:768px){
+    nav {
+        display:none;
+        flex-direction:column;
+        background:#111;
+        position:absolute;
+        top:60px;
+        right:0;
+        width:200px;
+    }
+    nav a {
+        padding:10px;
+        display:block;
+    }
+    .menu-icon {
+        display:block;
+    }
+}
+
+/* HERO */
+.hero {
+    height:400px;
+    background:url("images/necklace1.jpg") center/cover;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    position:relative;
+}
+
+.hero::after {
+    content:"";
+    position:absolute;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.3);
+}
+
+.hero-content {
+    position:relative;
+    color:white;
+    text-align:center;
+}
+
+.hero button {
+    padding:12px 25px;
+    background:gold;
+    border:none;
+    cursor:pointer;
+}
+
+/* SEARCH */
+.search {
+    text-align:center;
+    margin:20px;
+}
+
+.search input {
+    padding:10px;
+    width:260px;
+}
+
+/* FILTER */
+.filter {
+    text-align:center;
+}
+
+.filter button {
+    margin:5px;
+    padding:8px 15px;
+    border:none;
+    background:#333;
+    color:white;
+    cursor:pointer;
+}
+
+.filter button:hover {
+    background:gold;
+    color:black;
+}
+
+/* PRODUCTS */
+.products {
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:20px;
+    padding:30px;
+}
+
+.card {
+    background:white;
+    border-radius:12px;
+    overflow:hidden;
+    text-align:center;
+    box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+
+.card img {
+    width:100%;
+    height:200px;
+    object-fit:cover;
+}
+
+.card h3 { margin:10px 0; }
+
+.card p { color:#666; }
+
+button {
+    margin:5px;
+    padding:8px 12px;
+    border:none;
+    cursor:pointer;
+}
+
+.add { background:gold; }
+.view { background:#111; color:white; }
+.remove { background:red; color:white; }
+
+/* CART PANEL */
+.cart-panel {
+    position:fixed;
+    right:0;
+    top:0;
+    width:280px;
+    height:100%;
+    background:white;
+    padding:15px;
+    box-shadow:-5px 0 15px rgba(0,0,0,0.2);
+    overflow-y:auto;
+}
+
+.cart-item {
+    display:flex;
+    justify-content:space-between;
+    margin:10px 0;
+}
+
+/* MODAL */
+.modal {
+    display:none;
+    position:fixed;
+    top:20%;
+    left:50%;
+    transform:translateX(-50%);
+    background:white;
+    padding:20px;
+    text-align:center;
+    box-shadow:0 10px 30px rgba(0,0,0,0.3);
+}
+
+.modal img { width:250px; }
+
+footer {
+    background:#111;
+    color:white;
+    text-align:center;
+    padding:15px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h2>Veloura</h2>
+<div class="menu-icon" onclick="toggleMenu()">☰</div>
+<nav id="navMenu">
+<a href="#products">Collections</a>
+</nav>
+</header>
+
+<section class="hero">
+<div class="hero-content">
+<h1>Luxury Jewellery Collection</h1>
+<p>Elegant. Timeless. Premium.</p>
+<button onclick="scrollToProducts()">Explore Now</button>
+</div>
+</section>
+
+<div class="search">
+<input type="text" id="search" placeholder="Search..." onkeyup="searchProduct()">
+</div>
+
+<div class="filter">
+<button onclick="filterProducts('all')">All</button>
+<button onclick="filterProducts('necklace')">Necklaces</button>
+<button onclick="filterProducts('ring')">Rings</button>
+<button onclick="filterProducts('bracelet')">Bracelets</button>
+</div>
+
+<section id="products" class="products"></section>
+
+<!-- CART -->
+<div class="cart-panel">
+<h3>Cart</h3>
+<div id="cartItems"></div>
+<h4>Total: ₹<span id="total">0</span></h4>
+<button onclick="openCheckout()">Checkout</button>
+</div>
+
+<!-- CHECKOUT -->
+<div id="checkoutModal" class="modal">
+<h3>Checkout</h3>
+<input placeholder="Name"><br><br>
+<input placeholder="Address"><br><br>
+<input placeholder="Phone"><br><br>
+<button onclick="placeOrder()">Place Order</button>
+<button onclick="closeCheckout()">Cancel</button>
+</div>
+
+<!-- PRODUCT MODAL -->
+<div id="modal" class="modal">
+<h3 id="title"></h3>
+<img id="modalImg">
+<br><br>
+<button onclick="closeModal()">Close</button>
+</div>
+
+<footer>© 2026 Veloura Jewellery</footer>
+
+<script>
+
+/* NAVBAR */
+function toggleMenu(){
+let menu=document.getElementById("navMenu");
+menu.style.display = menu.style.display==="block" ? "none":"block";
+}
+
+/* PRODUCTS */
+let products = [
+{name:"Royal Gold Necklace",category:"necklace",price:3000,img:"images/necklace1.jpg"},
+{name:"Pearl Necklace",category:"necklace",price:2500,img:"images/necklace2.jpg"},
+{name:"Diamond Choker",category:"necklace",price:4000,img:"images/necklace3.jpg"},
+{name:"Temple Necklace",category:"necklace",price:3500,img:"images/necklace4.jpg"},
+{name:"Antique Necklace",category:"necklace",price:3200,img:"images/necklace5.jpg"},
+{name:"Kundan Necklace",category:"necklace",price:3800,img:"images/necklace6.jpg"},
+{name:"Layered Necklace",category:"necklace",price:2800,img:"images/necklace7.jpg"},
+
+{name:"Diamond Ring",category:"ring",price:2000,img:"images/ring1.jpg"},
+{name:"Gold Ring",category:"ring",price:1800,img:"images/ring2.jpg"},
+{name:"Platinum Ring",category:"ring",price:3000,img:"images/ring3.jpg"},
+{name:"Infinity Ring",category:"ring",price:1500,img:"images/ring4.jpg"},
+{name:"Rose Gold Ring",category:"ring",price:2200,img:"images/ring5.jpg"},
+{name:"Solitaire Ring",category:"ring",price:5000,img:"images/ring6.jpg"},
+{name:"Vintage Ring",category:"ring",price:2700,img:"images/ring7.jpg"},
+
+{name:"Gold Bracelet",category:"bracelet",price:1500,img:"images/bracelet1.jpg"},
+{name:"Diamond Bracelet",category:"bracelet",price:3500,img:"images/bracelet2.jpg"},
+{name:"Charm Bracelet",category:"bracelet",price:2000,img:"images/bracelet3.jpg"},
+{name:"Cuff Bracelet",category:"bracelet",price:1800,img:"images/bracelet4.jpg"},
+{name:"Pearl Bracelet",category:"bracelet",price:2200,img:"images/bracelet5.jpg"},
+{name:"Link Bracelet",category:"bracelet",price:1700,img:"images/bracelet6.jpg"},
+{name:"Beaded Bracelet",category:"bracelet",price:1400,img:"images/bracelet7.jpg"}
+];
+
+/* DISPLAY */
+function displayProducts(list){
+let container=document.getElementById("products");
+container.innerHTML="";
+list.forEach(p=>{
+container.innerHTML+=`
+<div class="card ${p.category}">
+<img src="${p.img}">
+<h3>${p.name}</h3>
+<p>₹${p.price}</p>
+<button class="add" onclick="addToCart('${p.name}',${p.price})">Add</button>
+<button class="view" onclick="openModal('${p.name}','${p.img}')">View</button>
+</div>`;
+});
+}
+displayProducts(products);
+
+/* SCROLL */
+function scrollToProducts(){
+document.getElementById("products").scrollIntoView({behavior:"smooth"});
+}
+
+/* FILTER */
+function filterProducts(cat){
+if(cat==="all") displayProducts(products);
+else displayProducts(products.filter(p=>p.category===cat));
+}
+
+/* SEARCH */
+function searchProduct(){
+let val=document.getElementById("search").value.toLowerCase();
+displayProducts(products.filter(p=>p.name.toLowerCase().includes(val)));
+}
+
+/* CART (LOCAL STORAGE) */
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+function saveCart(){
+localStorage.setItem("cart", JSON.stringify(cart));
+}
+
+function addToCart(name,price){
+cart.push({name,price});
+updateCart();
+saveCart();
+}
+
+function removeFromCart(index){
+cart.splice(index,1);
+updateCart();
+saveCart();
+}
+
+function updateCart(){
+let cartDiv=document.getElementById("cartItems");
+let total=0;
+cartDiv.innerHTML="";
+
+cart.forEach((item,i)=>{
+total+=item.price;
+cartDiv.innerHTML+=`
+<div class="cart-item">
+${item.name} ₹${item.price}
+<button class="remove" onclick="removeFromCart(${i})">X</button>
+</div>`;
+});
+
+document.getElementById("total").innerText=total;
+}
+updateCart();
+
+/* CHECKOUT */
+function openCheckout(){
+if(cart.length===0){
+alert("Cart is empty!");
+return;
+}
+document.getElementById("checkoutModal").style.display="block";
+}
+
+function closeCheckout(){
+document.getElementById("checkoutModal").style.display="none";
+}
+
+function placeOrder(){
+alert("Order placed successfully!");
+cart=[];
+saveCart();
+updateCart();
+closeCheckout();
+}
+
+/* MODAL */
+function openModal(name,img){
+document.getElementById("modal").style.display="block";
+document.getElementById("title").innerText=name;
+document.getElementById("modalImg").src=img;
+}
+
+function closeModal(){
+document.getElementById("modal").style.display="none";
+}
+
+</script>
+
+</body>
+</html>
